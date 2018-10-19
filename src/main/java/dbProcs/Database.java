@@ -1,14 +1,9 @@
 package dbProcs;
 
 import java.io.File;
-import java.lang.reflect.Executable;
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.util.Arrays;
 
-
-import com.mongodb.*;
 import org.apache.log4j.Logger;
 
 /**
@@ -43,22 +38,6 @@ public class Database
 		try
 		{
 			//log.debug("Closing database connection");
-			conn.close();
-		}
-		catch(Exception e)
-		{
-			log.error("Error closing connection:" + e.toString());
-		}
-	}
-
-	/**
-	 * This method is used by the application to close an open MongoDb connection
-	 * @param conn The connection to close
-	 */
-	public static void closeConnection(MongoClient conn)
-	{
-		try
-		{
 			conn.close();
 		}
 		catch(Exception e)
@@ -106,63 +85,6 @@ public class Database
 			e.printStackTrace();
 		}
 		return conn;
-	}
-
-	public static DBCollection getMongoChallengeConnection(String ApplicationRoot, String path)
-	{
-
-		//Some over paranoid input validation never hurts.
-		path = path.replaceAll("\\.", "").replaceAll("/", "");
-		log.debug("Path = " + path);
-
-		//Mongo DB URL out of mongo.properties
-		String props = Constants.MONGO_DB_PROP;
-
-		MongoClient mongoClient = null;
-		MongoCredential credential;
-		DB mongoDb;
-		DBCollection dbCollection = null;
-
-		// Properties file for all of mongo
-		String connectionHost = FileInputProperties.readfile(props, "connectionHost");
-		String connectionPort = FileInputProperties.readfile(props, "connectionPort");
-		log.debug("Connection URI = " + connectionHost + ":" + connectionPort);
-
-		//Pull info from level specific properties File
-		props = new File(Database.class.getResource("/challenges/" + path + ".properties").getFile()).getAbsolutePath();
-		log.debug("Level Properties File = " + path + ".properties");
-
-		String username = FileInputProperties.readfile(props, "databaseUsername");
-		//char[] password = FileInputProperties.readfile(props, databasePassword);
-		String password = FileInputProperties.readfile(props, "databasePassword");
-		String dbname = FileInputProperties.readfile(props, "databaseName");
-		String dbCollectionName = FileInputProperties.readfile(props, "databaseCollection");
-
-		log.debug("Mongo db & collection = " + dbname + " " + dbCollectionName);
-
-		credential = MongoCredential.createCredential(username, dbname, password.toCharArray());
-
-		try
-		{
-			mongoClient = new MongoClient(new ServerAddress(connectionHost, Integer.parseInt(connectionPort)),
-					Arrays.asList(credential));
-			mongoDb = mongoClient.getDB(dbname);
-			dbCollection = mongoDb.getCollection(dbCollectionName);
-		}
-		catch (MongoException e){
-			log.fatal("Unable to get Mongodb connection (Is it on?): " + e);
-			e.printStackTrace();
-			closeConnection(mongoClient);
-		}
-		catch (Exception e){
-			log.fatal("Something went wrong with Mongo: " + e);
-			e.printStackTrace();
-			closeConnection(mongoClient);
-		}
-
-
-		return dbCollection;
-
 	}
 
 	/**
@@ -241,7 +163,7 @@ public class Database
 	}
 
 	/**
-	 * This method is used by the application to get a connection to the secure database sever's 
+	 * This method is used by the application to get a connection to the secure database sever's
 	 * SQL injection Lesson schema
 	 * @param ApplicationRoot The running context of the application.
 	 * @return A connection to the secure database server
