@@ -1,0 +1,12 @@
+{
+  "summary": {
+    "title": "Prueba 1",
+    "owner": "Juan",
+    "description": "Prueba 1 - SDA"
+  },
+  "detail": {
+    "contributors": [],
+    "diagrams": [],
+    "reviewer": "Juan"
+  }
+}
